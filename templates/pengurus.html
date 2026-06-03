@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Pengurus{% endblock %}
+{% block role_label %}Pengurus{% endblock %}
+{% block page_title %}Dashboard Pengurus{% endblock %}
+{% block page_subtitle %}Buat dan pantau booking lapanganmu.{% endblock %}
+
+{% block nav_links %}
+<a href="/pengurus" class="active">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+  Dashboard
+</a>
+<a href="/booking">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  Booking Lapangan
+</a>
+<a href="/riwayat">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+  Riwayat Booking
+</a>
+{% endblock %}
+
+{% block cards %}
+<div class="card">
+  <div class="card-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </div>
+  <h3>Booking Lapangan</h3>
+  <p>Buat reservasi lapangan baru</p>
+</div>
+
+<div class="card">
+  <div class="card-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+  </div>
+  <h3>Riwayat Booking</h3>
+  <p>Lihat semua booking yang pernah dibuat</p>
+</div>
+
+<div class="card">
+  <div class="card-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+  </div>
+  <h3>Cek Ketersediaan</h3>
+  <p>Lihat jadwal lapangan yang tersedia</p>
+</div>
+{% endblock %}

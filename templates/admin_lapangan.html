@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Kelola Lapangan{% endblock %}
+{% block role_label %}Admin{% endblock %}
+{% block page_title %}Kelola Lapangan{% endblock %}
+{% block page_subtitle %}Tambah, edit, dan hapus data lapangan.{% endblock %}
+
+{% block nav_links %}
+<a href="/admin">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+  Dashboard
+</a>
+<a href="/admin/users">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+  Kelola User
+</a>
+<a href="/admin/lapangan" class="active">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+  Kelola Lapangan
+</a>
+<a href="/admin/laporan">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+  Laporan
+</a>
+{% endblock %}
+
+{% block main_content %}
+<div class="form-card">
+  <h2>Tambah Lapangan</h2>
+  <form action="/admin/lapangan" method="POST" class="form-grid">
+    <div>
+      <label for="nama_lapangan">Nama Lapangan</label>
+      <input type="text" id="nama_lapangan" name="nama_lapangan" placeholder="Contoh: Lapangan A" required />
+    </div>
+    <div>
+      <label for="deskripsi">Deskripsi (opsional)</label>
+      <input type="text" id="deskripsi" name="deskripsi" placeholder="Mis: Lapangan futsal" />
+    </div>
+    <div>
+      <button type="submit" class="primary">Tambah Lapangan</button>
+    </div>
+  </form>
+</div>
+
+<div class="table-wrapper">
+  <h3 style="margin-bottom: 14px;">Daftar Lapangan</h3>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Nama</th><th>Deskripsi</th><th>Aksi</th></tr>
+    </thead>
+    <tbody>
+      {% for l in lapangans %}
+      <tr>
+        <td>{{ l.id }}</td>
+        <td>{{ l.nama_lapangan }}</td>
+        <td>{{ l.deskripsi or '-' }}</td>
+        <td><a href="/admin/lapangan/delete/{{ l.id }}" style="color:#f87171;">Hapus</a></td>
+      </tr>
+      {% endfor %}
+      {% if lapangans|length == 0 %}
+      <tr><td colspan="4">Belum ada data lapangan.</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

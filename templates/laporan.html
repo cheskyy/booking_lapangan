@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Laporan{% endblock %}
+{% block role_label %}Admin{% endblock %}
+{% block page_title %}Laporan Booking{% endblock %}
+{% block page_subtitle %}Ringkasan statistik dan laporan penggunaan lapangan.{% endblock %}
+
+{% block nav_links %}
+<a href="/admin">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+  Dashboard
+</a>
+<a href="/riwayat">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+  Lihat Booking
+</a>
+<a href="/admin/users">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+  Kelola User
+</a>
+<a href="/admin/laporan" class="active">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+  Laporan
+</a>
+{% endblock %}
+
+{% block main_content %}
+<div class="cards-grid">
+  <div class="card">
+    <div class="card-icon">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+    </div>
+    <h3>Total Booking</h3>
+    <p>{{ total_booking }}</p>
+  </div>
+  <div class="card">
+    <div class="card-icon">
+      <svg viewBox="0 0 24 24"><path d="M3 9h18M9 21V9"/></svg>
+    </div>
+    <h3>Booking per Lapangan</h3>
+    <p>Jumlah booking berdasarkan lapangan</p>
+  </div>
+  <div class="card">
+    <div class="card-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/></svg>
+    </div>
+    <h3>Booking per Role</h3>
+    <p>Statistik booking berdasarkan role pengguna</p>
+  </div>
+</div>
+
+<div class="table-wrapper">
+  <h3 style="margin-bottom: 14px;">Detail Booking per Lapangan</h3>
+  <table>
+    <thead>
+      <tr><th>Nama Lapangan</th><th>Total Booking</th></tr>
+    </thead>
+    <tbody>
+      {% for row in total_per_lapangan %}
+      <tr>
+        <td>{{ row.nama_lapangan }}</td>
+        <td>{{ row.total }}</td>
+      </tr>
+      {% endfor %}
+      {% if total_per_lapangan|length == 0 %}
+      <tr><td colspan="2">Tidak ada data booking.</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+<div class="table-wrapper">
+  <h3 style="margin-bottom: 14px;">Booking per Role</h3>
+  <table>
+    <thead>
+      <tr><th>Role</th><th>Total Booking</th></tr>
+    </thead>
+    <tbody>
+      {% for row in total_per_role %}
+      <tr>
+        <td>{{ row.role_pemesan }}</td>
+        <td>{{ row.total }}</td>
+      </tr>
+      {% endfor %}
+      {% if total_per_role|length == 0 %}
+      <tr><td colspan="2">Tidak ada data booking.</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+<div class="table-wrapper">
+  <h3 style="margin-bottom: 14px;">Booking Terakhir per Tanggal</h3>
+  <table>
+    <thead>
+      <tr><th>Tanggal</th><th>Total</th></tr>
+    </thead>
+    <tbody>
+      {% for row in total_per_tanggal %}
+      <tr>
+        <td>{{ row.tanggal }}</td>
+        <td>{{ row.total }}</td>
+      </tr>
+      {% endfor %}
+      {% if total_per_tanggal|length == 0 %}
+      <tr><td colspan="2">Tidak ada data booking.</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

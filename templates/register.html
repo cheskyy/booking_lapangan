@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Daftar{% endblock %}
+{% block role_label %}Daftar{% endblock %}
+{% block page_title %}Registrasi Pengguna{% endblock %}
+{% block page_subtitle %}Buat akun untuk memesan lapangan.{% endblock %}
+
+{% block main_content %}
+<div class="form-card">
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="flash">
+      {% for message in messages %}
+        <div>{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endwith %}
+  <form action="/register" method="POST" class="form-grid">
+    <div>
+      <label for="username">Username</label>
+      <input type="text" id="username" name="username" placeholder="Masukkan username" required />
+    </div>
+
+    <div>
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" placeholder="Masukkan password" required />
+    </div>
+
+    <div>
+      <button type="submit" class="primary">Daftar</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

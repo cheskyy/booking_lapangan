@@ -1,0 +1,26 @@
+{
+  "admin": {
+    "password": "123",
+    "role": "admin"
+  },
+  "pegawai": {
+    "password": "123",
+    "role": "pegawai"
+  },
+  "pengurus": {
+    "password": "123",
+    "role": "pengurus"
+  },
+  "chelsea": {
+    "password": "123",
+    "role": "pegawai"
+  },
+  "sisi": {
+    "password": "123",
+    "role": "user"
+  },
+  "aci": {
+    "password": "123",
+    "role": "user"
+  }
+}

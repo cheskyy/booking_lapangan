@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Kelola User{% endblock %}
+{% block role_label %}Admin{% endblock %}
+{% block page_title %}Kelola User{% endblock %}
+{% block page_subtitle %}Tambah, edit, dan hapus akun pengguna sistem.{% endblock %}
+
+{% block nav_links %}
+<a href="/admin">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+  Dashboard
+</a>
+<a href="/admin/users" class="active">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+  Kelola User
+</a>
+<a href="/riwayat">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+  Lihat Booking
+</a>
+<a href="/admin/laporan">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+  Laporan
+</a>
+{% endblock %}
+
+{% block main_content %}
+<div class="form-card">
+  <h2>Tambah atau perbarui pengguna</h2>
+  <form action="/admin/users" method="POST" class="form-grid">
+    <div>
+      <label for="username">Username</label>
+      <input type="text" id="username" name="username" placeholder="contoh: pegawai1" required />
+    </div>
+    <div>
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" placeholder="Masukkan password" required />
+    </div>
+    <div>
+      <label for="role">Role</label>
+      <select id="role" name="role">
+        <option value="admin">Admin</option>
+        <option value="pegawai">Pegawai</option>
+        <option value="pengurus">Pengurus</option>
+      </select>
+    </div>
+    <div>
+      <button type="submit" class="primary">Simpan Akun</button>
+    </div>
+  </form>
+</div>
+
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Role</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for username, data in users.items() %}
+      <tr>
+        <td>{{ username }}</td>
+        <td>{{ data.role | capitalize }}</td>
+        <td>
+          <a href="/admin/users/delete/{{ username }}" style="color: #f87171;">Hapus</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

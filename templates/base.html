@@ -1,363 +1,98 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}Dashboard{% endblock %} — Booking Lapangan</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --green:  #00c97a;
-      --dark:   #0b1120;
-      --card:   #111827;
-      --card2:  #162032;
-      --border: #1f2d3d;
-      --text:   #e2e8f0;
-      --muted:  #64748b;
-      --accent: {% block accent %}#00c97a{% endblock %};
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              300: '#6ee7b7',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b'
+            }
+          }
+        }
+      }
     }
-
-    body {
-      min-height: 100vh;
-      background: var(--dark);
-      font-family: 'DM Sans', sans-serif;
-      color: var(--text);
-      display: flex;
-    }
-
-    /* sidebar */
-    .sidebar {
-      width: 240px;
-      min-height: 100vh;
-      background: var(--card);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      padding: 28px 20px;
-      position: fixed; top:0; left:0; bottom:0;
-    }
-
-    .logo {
-      display: flex; align-items: center; gap: 10px;
-      margin-bottom: 40px;
-    }
-
-    .logo-icon {
-      width: 36px; height: 36px;
-      background: var(--accent);
-      border-radius: 8px;
-      display: grid; place-items: center;
-    }
-
-    .logo-icon svg { width:18px; height:18px; fill:var(--dark); }
-
-    .logo-text {
-      font-family: 'Syne', sans-serif;
-      font-size: 15px; font-weight: 800;
-      line-height: 1.2;
-    }
-
-    .logo-text span { color: var(--accent); }
-
-    .role-badge {
-      display: inline-flex; align-items: center;
-      gap: 6px;
-      background: rgba(0,201,122,.1);
-      border: 1px solid rgba(0,201,122,.2);
-      color: var(--accent);
-      border-radius: 99px;
-      padding: 5px 12px;
-      font-size: 11px;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      margin-bottom: 28px;
-    }
-
-    .role-badge::before {
-      content: '';
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
-    }
-
-    nav { flex: 1; }
-
-    nav a {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 12px;
-      border-radius: 8px;
-      color: var(--muted);
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 500;
-      transition: background .15s, color .15s;
-      margin-bottom: 2px;
-    }
-
-    nav a:hover, nav a.active {
-      background: var(--card2);
-      color: var(--text);
-    }
-
-    nav a svg { width:16px; height:16px; flex-shrink:0; }
-
-    .logout-btn {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 12px;
-      border-radius: 8px;
-      color: #ef4444;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 500;
-      transition: background .15s;
-    }
-
-    .logout-btn:hover { background: rgba(239,68,68,.08); }
-    .logout-btn svg { width:16px; height:16px; }
-
-    /* main */
-    .main {
-      margin-left: 240px;
-      padding: 40px 44px;
-      flex: 1;
-      min-height: 100vh;
-    }
-
-    .page-header {
-      margin-bottom: 36px;
-      animation: fadeIn .4s ease both;
-    }
-
-    .page-header h1 {
-      font-family: 'Syne', sans-serif;
-      font-size: 28px; font-weight: 800;
-    }
-
-    .page-header p { color: var(--muted); font-size: 14px; margin-top: 4px; }
-
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 18px;
-      animation: fadeIn .4s .1s ease both;
-    }
-
-    .main-content {
-      animation: fadeIn .4s .1s ease both;
-      display: grid;
-      gap: 20px;
-    }
-
-    .flash {
-      background: rgba(16, 185, 129, .12);
-      border: 1px solid rgba(16, 185, 129, .25);
-      color: #a7f3d0;
-      padding: 16px 20px;
-      border-radius: 14px;
-      margin-bottom: 24px;
-      font-size: 14px;
-    }
-
-    .table-wrapper {
-      overflow-x: auto;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 20px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      color: var(--text);
-      min-width: 680px;
-    }
-
-    th, td {
-      padding: 14px 12px;
-      text-align: left;
-      border-bottom: 1px solid rgba(148, 163, 184, .12);
-      font-size: 14px;
-    }
-
-    th { color: var(--accent); font-weight: 700; }
-
-    tr:last-child td { border-bottom: none; }
-
-    .form-card {
-      background: var(--card);
-      border-radius: 18px;
-      padding: 24px;
-      border: 1px solid var(--border);
-    }
-
-    .form-grid {
-      display: grid;
-      gap: 20px;
-    }
-
-    label {
-      display: block;
-      color: var(--muted);
-      font-size: 13px;
-      margin-bottom: 8px;
-      font-weight: 600;
-    }
-
-    input, select, textarea {
-      width: 100%;
-      background: var(--dark);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px 14px;
-      color: var(--text);
-      font-size: 14px;
-      outline: none;
-      transition: border-color .2s, box-shadow .2s;
-    }
-
-    input:focus, select:focus, textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(0,201,122,.12);
-    }
-
-    button.primary {
-      border: none;
-      border-radius: 12px;
-      padding: 14px 18px;
-      background: var(--accent);
-      color: var(--dark);
-      font-weight: 700;
-      cursor: pointer;
-      transition: opacity .2s, transform .15s;
-    }
-
-    button.primary:hover { opacity: .9; transform: translateY(-1px); }
-
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: .02em;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-
-    .status-pending { background: rgba(245, 158, 11, .12); color: #fbbf24; }
-    .status-approved { background: rgba(34, 197, 94, .12); color: #4ade80; }
-    .status-rejected { background: rgba(239, 68, 68, .12); color: #f87171; }
-    .status-finished { background: rgba(59, 130, 246, .12); color: #60a5fa; }
-    .status-cancelled { background: rgba(107, 114, 128, .12); color: #9ca3af; }
-    .status-tersedia { background: rgba(34, 197, 94, .12); color: #4ade80; }
-    .status-terisi { background: rgba(239, 68, 68, .12); color: #f87171; }
-
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 18px;
-      animation: fadeIn .4s .1s ease both;
-    }
-
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 24px;
-      position: relative;
-      overflow: hidden;
-      transition: border-color .2s, transform .2s;
-      cursor: default;
-    }
-
-    .card:hover {
-      border-color: var(--accent);
-      transform: translateY(-2px);
-    }
-
-    .card::after {
-      content: '';
-      position: absolute; top:0; left:0; right:0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--accent), transparent);
-      opacity: 0;
-      transition: opacity .2s;
-    }
-
-    .card:hover::after { opacity: 1; }
-
-    .card-icon {
-      width: 42px; height: 42px;
-      background: rgba(0,201,122,.1);
-      border-radius: 10px;
-      display: grid; place-items: center;
-      margin-bottom: 16px;
-    }
-
-    .card-icon svg { width:20px; height:20px; stroke: var(--accent); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
-
-    .card h3 {
-      font-family: 'Syne', sans-serif;
-      font-size: 15px; font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .card p { font-size: 13px; color: var(--muted); }
-
-    @keyframes fadeIn {
-      from { opacity:0; transform:translateY(12px); }
-      to   { opacity:1; transform:translateY(0); }
-    }
-  </style>
-  {% block extra_style %}{% endblock %}
+  </script>
 </head>
-<body>
-  <aside class="sidebar">
-    <div class="logo">
-      <div class="logo-icon">
-        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
-      </div>
-      <div class="logo-text">Booking<br><span>Lapangan</span></div>
-    </div>
-
-    <div class="role-badge">{% block role_label %}User{% endblock %}</div>
-
-    <nav>{% block nav_links %}{% endblock %}</nav>
-
-    <a href="/logout" class="logout-btn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-      </svg>
-      Logout
-    </a>
-  </aside>
-
-  <main class="main">
-    <div class="page-header">
-      <h1>{% block page_title %}Dashboard{% endblock %}</h1>
-      <p>{% block page_subtitle %}{% endblock %}</p>
-    </div>
-
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <div class="flash">
-          {% for message in messages %}
-            <div>{{ message }}</div>
-          {% endfor %}
+<body class="min-h-screen bg-slate-50 text-slate-900 font-sans">
+  <div class="min-h-screen lg:flex">
+    <aside class="bg-white border-r border-slate-200 lg:w-72 w-full shadow-sm">
+      <div class="mx-auto max-w-7xl px-4 py-6 lg:px-6">
+        <div class="flex items-center gap-3">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-500 text-white shadow-sm">
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+          </div>
+          <div>
+            <p class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Booking</p>
+            <h1 class="text-xl font-extrabold text-slate-900">Lapangan</h1>
+          </div>
         </div>
-      {% endif %}
-    {% endwith %}
 
-    {% block main_content %}
-      <div class="cards-grid">
-        {% block cards %}{% endblock %}
+        <div class="mt-8 rounded-3xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Role</p>
+              <p class="mt-1 text-sm font-semibold text-slate-900">{% block role_label %}User{% endblock %}</p>
+            </div>
+            <span class="rounded-full bg-brand-100 px-3 py-1 text-xs font-semibold uppercase text-brand-700">Aktif</span>
+          </div>
+        </div>
+
+        <nav class="mt-8 space-y-1">
+          {% block nav_links %}{% endblock %}
+        </nav>
+
+        <div class="mt-8 border-t border-slate-200 pt-4">
+          <a href="/logout" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+            <svg class="mr-2 h-4 w-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Logout
+          </a>
+        </div>
       </div>
-    {% endblock %}
-  </main>
+    </aside>
+
+    <div class="flex-1 bg-slate-50">
+      <header class="sticky top-0 z-30 border-b border-slate-200 bg-slate-50/95 backdrop-blur-sm">
+        <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 lg:px-6">
+          <div>
+            <h2 class="text-lg font-semibold text-slate-900">{% block page_title %}Dashboard{% endblock %}</h2>
+            <p class="mt-1 text-sm text-slate-600">{% block page_subtitle %}Kelola booking lapangan dengan mudah.{% endblock %}</p>
+          </div>
+          <div class="hidden items-center gap-3 sm:flex">
+            <button class="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-100">Bantuan</button>
+            <button class="rounded-2xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-brand-500/20 transition hover:bg-brand-700">Tambah Booking</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="mx-auto max-w-7xl px-4 py-6 lg:px-6">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="mb-6 rounded-3xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-800 shadow-sm">
+              {% for message in messages %}
+                <div>{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        {% block main_content %}{% endblock %}
+      </main>
+    </div>
+  </div>
 </body>
 </html>

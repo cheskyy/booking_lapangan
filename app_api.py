@@ -1,5 +1,3 @@
-import json
-import os
 import jwt
 from datetime import datetime, timedelta
 from functools import wraps
@@ -9,13 +7,11 @@ from flask_cors import CORS
 import pymysql
 
 from config import Config
+from user_utils import get_user, create_user, verify_password, list_users, delete_user, update_user, migrate_json_users
 
 app = Flask(__name__)
 app.config.from_object(Config)
 CORS(app)
-
-BASE_DIR = os.path.dirname(__file__)
-USERS_FILE = os.path.join(BASE_DIR, "users.json")
 
 
 def get_db():
@@ -27,27 +23,6 @@ def get_db():
         database=app.config['MYSQL_DB'],
         cursorclass=pymysql.cursors.DictCursor
     )
-
-
-def load_users():
-    """Load users from JSON file"""
-    if os.path.exists(USERS_FILE):
-        try:
-            with open(USERS_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            pass
-    return {
-        "admin": {"password": "123", "role": "admin"},
-        "pegawai": {"password": "123", "role": "pegawai"},
-        "pengurus": {"password": "123", "role": "pengurus"},
-    }
-
-
-def save_users(users_data):
-    """Save users to JSON file"""
-    with open(USERS_FILE, "w", encoding="utf-8") as f:
-        json.dump(users_data, f, indent=2, ensure_ascii=False)
 
 
 def create_token(username, role):
@@ -103,7 +78,11 @@ def token_required(allowed_roles=None):
     return decorator
 
 
-users = load_users()
+try:
+    migrate_json_users()
+except Exception:
+    pass
+
 
 # ── AUTH ENDPOINTS ─────────────────────────────────
 
@@ -118,8 +97,8 @@ def login():
     username = data.get('username', '').strip()
     password = data.get('password', '')
     
-    user = users.get(username)
-    if not user or user['password'] != password:
+    user = get_user(username)
+    if not user or not verify_password(user.get('password'), password):
         return jsonify({'success': False, 'message': 'Username atau password salah'}), 401
     
     token = create_token(username, user['role'])
@@ -145,11 +124,13 @@ def register():
     username = data.get('username', '').strip()
     password = data.get('password', '')
     
-    if username in users:
+    if get_user(username):
         return jsonify({'success': False, 'message': 'Username sudah terdaftar'}), 409
-    
-    users[username] = {'password': password, 'role': 'user'}
-    save_users(users)
+
+    try:
+        create_user(username, password, 'user')
+    except Exception:
+        return jsonify({'success': False, 'message': 'Gagal membuat user'}), 500
     
     return jsonify({
         'success': True,
@@ -504,9 +485,10 @@ def get_jadwal():
 @token_required(allowed_roles=['admin'])
 def admin_get_users():
     """Get semua users"""
+    data = list_users()
     return jsonify({
         'success': True,
-        'data': list(users.items())
+        'data': data
     }), 200
 
 
@@ -523,11 +505,12 @@ def admin_create_user():
     password = data.get('password', '')
     role = data.get('role', 'user')
     
-    if username in users:
+    if get_user(username):
         return jsonify({'success': False, 'message': 'Username sudah ada'}), 409
-    
-    users[username] = {'password': password, 'role': role}
-    save_users(users)
+    try:
+        create_user(username, password, role)
+    except Exception:
+        return jsonify({'success': False, 'message': 'Gagal membuat user'}), 500
     
     return jsonify({
         'success': True,
@@ -542,11 +525,9 @@ def admin_delete_user(username):
     if username == request.user['username']:
         return jsonify({'success': False, 'message': 'Tidak bisa menghapus akun sendiri'}), 400
     
-    if username not in users:
+    if not get_user(username):
         return jsonify({'success': False, 'message': 'User tidak ditemukan'}), 404
-    
-    users.pop(username)
-    save_users(users)
+    delete_user(username)
     
     return jsonify({
         'success': True,

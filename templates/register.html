@@ -1,35 +1,36 @@
 {% extends "base.html" %}
 
-{% block title %}Daftar{% endblock %}
-{% block role_label %}Daftar{% endblock %}
+{% block title %}Registrasi{% endblock %}
 {% block page_title %}Registrasi Pengguna{% endblock %}
-{% block page_subtitle %}Buat akun untuk memesan lapangan.{% endblock %}
+{% block page_subtitle %}Buat akun baru untuk memesan lapangan dengan cepat.{% endblock %}
+
+{% block nav_links %}
+<a href="/login" class="block rounded-3xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100">Kembali ke Login</a>
+{% endblock %}
 
 {% block main_content %}
-<div class="form-card">
+<div class="mx-auto grid max-w-2xl gap-6 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-lg shadow-slate-200/50 sm:p-10">
   {% with messages = get_flashed_messages() %}
     {% if messages %}
-    <div class="flash">
-      {% for message in messages %}
-        <div>{{ message }}</div>
-      {% endfor %}
-    </div>
+      <div class="rounded-3xl border border-rose-200 bg-rose-50 px-4 py-4 text-sm text-rose-700">
+        {% for message in messages %}
+          <p>{{ message }}</p>
+        {% endfor %}
+      </div>
     {% endif %}
   {% endwith %}
-  <form action="/register" method="POST" class="form-grid">
-    <div>
-      <label for="username">Username</label>
-      <input type="text" id="username" name="username" placeholder="Masukkan username" required />
-    </div>
 
+  <form action="/register" method="POST" class="grid gap-5">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div>
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" placeholder="Masukkan password" required />
+      <label for="username" class="block text-sm font-semibold text-slate-700">Username</label>
+      <input id="username" name="username" type="text" required placeholder="Masukkan username" class="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-100" />
     </div>
-
     <div>
-      <button type="submit" class="primary">Daftar</button>
+      <label for="password" class="block text-sm font-semibold text-slate-700">Password</label>
+      <input id="password" name="password" type="password" required placeholder="Masukkan password" class="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-100" />
     </div>
+    <button type="submit" class="rounded-3xl bg-brand-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/20 transition hover:bg-brand-700">Daftar</button>
   </form>
 </div>
 {% endblock %}

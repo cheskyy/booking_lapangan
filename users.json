@@ -22,5 +22,13 @@
   "aci": {
     "password": "123",
     "role": "user"
+  },
+  "sea": {
+    "password": "123",
+    "role": "user"
+  },
+  "aku": {
+    "password": "123",
+    "role": "user"
   }
 }

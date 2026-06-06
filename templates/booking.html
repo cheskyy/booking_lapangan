@@ -6,53 +6,40 @@
 {% block page_subtitle %}Isi data booking untuk memesan lapangan.{% endblock %}
 
 {% block nav_links %}
-<a href="/{{ session['role'] }}">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-  Dashboard
-</a>
-<a href="/lapangan">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-  Daftar Lapangan
-</a>
-<a href="/booking" class="active">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-  Booking
-</a>
-<a href="/riwayat">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-  Riwayat Booking
-</a>
+<a href="/dashboard" class="block rounded-3xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100">Dashboard</a>
+<a href="/lapangan" class="block rounded-3xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100">Daftar Lapangan</a>
+<a href="/booking" class="block rounded-3xl bg-brand-50 px-4 py-3 text-sm font-medium text-brand-700 shadow-sm">Booking</a>
+<a href="/riwayat" class="block rounded-3xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100">Riwayat Booking</a>
 {% endblock %}
 
 {% block main_content %}
-<div class="form-card">
-  <form action="/booking" method="POST" class="form-grid">
+<div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+  <form action="/booking" method="POST" class="grid gap-5">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div>
-      <label for="nama_lapangan">Nama Lapangan</label>
-      <input type="text" id="nama_lapangan" name="nama_lapangan" placeholder="Ketikan nama lapangan..." required />
-      <small style="display:block; margin-top:8px; color:#6b7280;">Masukkan nama lapangan secara manual.</small>
+      <label for="nama_lapangan" class="text-sm font-medium text-slate-700">Nama Lapangan</label>
+      <input type="text" id="nama_lapangan" name="nama_lapangan" placeholder="Ketikan nama lapangan..." required class="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-100" />
+      <p class="mt-2 text-sm text-slate-500">Masukkan nama lapangan secara manual.</p>
     </div>
     <div>
-      <label for="tanggal">Tanggal</label>
-      <input type="date" id="tanggal" name="tanggal" required />
+      <label for="tanggal" class="text-sm font-medium text-slate-700">Tanggal</label>
+      <input type="date" id="tanggal" name="tanggal" required class="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-100" />
     </div>
-    <div class="form-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px;">
+    <div class="grid gap-5 sm:grid-cols-2">
       <div>
-        <label for="jam_mulai">Jam Mulai</label>
-        <input type="time" id="jam_mulai" name="jam_mulai" required />
+        <label for="jam_mulai" class="text-sm font-medium text-slate-700">Jam Mulai</label>
+        <input type="time" id="jam_mulai" name="jam_mulai" required class="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-100" />
       </div>
       <div>
-        <label for="jam_selesai">Jam Selesai</label>
-        <input type="time" id="jam_selesai" name="jam_selesai" required />
+        <label for="jam_selesai" class="text-sm font-medium text-slate-700">Jam Selesai</label>
+        <input type="time" id="jam_selesai" name="jam_selesai" required class="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-100" />
       </div>
     </div>
     <div>
-      <label for="catatan">Catatan</label>
-      <textarea id="catatan" name="catatan" rows="4" placeholder="Tambah catatan jika perlu..."></textarea>
+      <label for="catatan" class="text-sm font-medium text-slate-700">Catatan</label>
+      <textarea id="catatan" name="catatan" rows="4" placeholder="Tambah catatan jika perlu..." class="mt-2 w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-100"></textarea>
     </div>
-    <div>
-      <button type="submit" class="primary">Simpan Booking</button>
-    </div>
+    <button type="submit" class="rounded-3xl bg-brand-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-500/20 transition hover:bg-brand-700">Simpan Booking</button>
   </form>
 </div>
 {% endblock %}

@@ -1,54 +1,43 @@
-import json
 import os
+import pymysql
+from datetime import datetime, timedelta
 
 from flask import Flask, render_template, request, redirect, session, flash
-import pymysql
 from functools import wraps
+from flask_wtf import CSRFProtect
+
+from config import Config
+from user_utils import get_user, create_user, verify_password, list_users, delete_user, update_user, migrate_json_users
+
 
 app = Flask(__name__)
-app.secret_key = "booking123"
+app.config.from_object(Config)
 
-# Konfigurasi MySQL
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''  # kosong jika XAMPP default
-app.config['MYSQL_DB'] = 'booking_lapangan'
-app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+# Session & cookie hardening
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SECURE=False,  # set True in production with HTTPS
+    SESSION_COOKIE_SAMESITE='Lax',
+    PERMANENT_SESSION_LIFETIME=timedelta(minutes=60),
+)
+
+csrf = CSRFProtect(app)
+
+# migrate users.json into DB if running init
+try:
+    migrate_json_users()
+except Exception:
+    pass
+
 
 def get_db():
     return pymysql.connect(
-        host=app.config['MYSQL_HOST'],
-        user=app.config['MYSQL_USER'],
-        password=app.config['MYSQL_PASSWORD'],
-        database=app.config['MYSQL_DB'],
-        cursorclass=pymysql.cursors.DictCursor
+        host=app.config.get('MYSQL_HOST', 'localhost'),
+        user=app.config.get('MYSQL_USER', 'root'),
+        password=app.config.get('MYSQL_PASSWORD', ''),
+        database=app.config.get('MYSQL_DB', 'booking_lapangan'),
+        cursorclass=pymysql.cursors.DictCursor,
     )
-
-BASE_DIR = os.path.dirname(__file__)
-USERS_FILE = os.path.join(BASE_DIR, "users.json")
-
-
-def load_users():
-    if os.path.exists(USERS_FILE):
-        try:
-            with open(USERS_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            pass
-    # fallback defaults
-    return {
-        "admin": {"password": "123", "role": "admin"},
-        "pegawai": {"password": "123", "role": "pegawai"},
-        "pengurus": {"password": "123", "role": "pengurus"},
-    }
-
-
-def save_users(users_data):
-    with open(USERS_FILE, "w", encoding="utf-8") as f:
-        json.dump(users_data, f, indent=2)
-
-
-users = load_users()
 
 def login_required(role):
     def decorator(f):
@@ -78,10 +67,11 @@ def login():
 def cek_login():
     username = request.form.get("username", "").strip()
     password = request.form.get("password", "")
-    user = users.get(username)
-    if user and user["password"] == password:
+    user = get_user(username)
+    if user and verify_password(user.get('password'), password):
+        session.permanent = True
         session["username"] = username
-        session["role"] = user["role"]
+        session["role"] = user.get("role")
         if user["role"] == "user":
             return redirect("/booking")
         return redirect(f"/{user['role']}")
@@ -100,15 +90,15 @@ def register():
             flash("Username dan password wajib diisi.")
             return redirect("/register")
 
-        if username in users:
+        if get_user(username):
             flash("Username sudah terdaftar.")
             return redirect("/register")
 
-        users[username] = {"password": password, "role": role}
         try:
-            save_users(users)
+            create_user(username, password, role)
         except Exception:
-            pass
+            flash("Gagal membuat akun, coba lagi.")
+            return redirect("/register")
 
         flash("Registrasi berhasil. Silakan login.")
         return redirect("/")
@@ -132,13 +122,14 @@ def admin_users():
         if not username or not password:
             flash("Username dan password tidak boleh kosong.")
             return redirect("/admin/users")
-
-        users[username] = {"password": password, "role": role}
-        save_users(users)
-        flash(f"Akun {username} berhasil disimpan.")
+        try:
+            create_user(username, password, role)
+            flash(f"Akun {username} berhasil disimpan.")
+        except Exception as e:
+            flash(f"Gagal menyimpan akun: {e}")
         return redirect("/admin/users")
-
-    return render_template("admin_users.html", users=users)
+    users_data = list_users()
+    return render_template("admin_users.html", users=users_data)
 
 
 @app.route("/admin/users/delete/<username>")
@@ -146,12 +137,15 @@ def admin_users():
 def admin_delete_user(username):
     if username == session.get("username"):
         flash("Anda tidak bisa menghapus akun yang sedang login.")
-    elif username in users:
-        users.pop(username)
-        save_users(users)
-        flash(f"Akun {username} berhasil dihapus.")
-    else:
+        return redirect("/admin/users")
+
+    u = get_user(username)
+    if not u:
         flash("Akun tidak ditemukan.")
+        return redirect("/admin/users")
+
+    delete_user(username)
+    flash(f"Akun {username} berhasil dihapus.")
     return redirect("/admin/users")
 
 
@@ -182,6 +176,31 @@ def admin_laporan():
         total_per_lapangan=total_per_lapangan,
         total_per_tanggal=total_per_tanggal,
     )
+
+
+@app.route('/admin/users/edit/<username>', methods=['GET', 'POST'])
+@login_required('admin')
+def admin_edit_user(username):
+    u = get_user(username)
+    if not u:
+        flash('User tidak ditemukan.')
+        return redirect('/admin/users')
+
+    if request.method == 'POST':
+        password = request.form.get('password', '')
+        role = request.form.get('role', u.get('role'))
+
+        try:
+            if password:
+                update_user(username, password=password, role=role)
+            else:
+                update_user(username, role=role)
+            flash('User berhasil diupdate.')
+        except Exception as e:
+            flash(f'Gagal mengupdate user: {e}')
+        return redirect('/admin/users')
+
+    return render_template('admin_edit_user.html', user=u)
 
 
 # ── KELOLA LAPANGAN (admin) ─────────────────────────
@@ -307,37 +326,62 @@ def lapangan():
         return redirect("/")
 
     tanggal = request.args.get("tanggal")
+    query_date = None
+    if tanggal:
+        try:
+            query_date = datetime.strptime(tanggal, "%Y-%m-%d").date()
+        except ValueError:
+            app.logger.warning("Invalid tanggal format received: %s", tanggal)
+            query_date = None
+
     conn = get_db()
     try:
         cur = conn.cursor()
         cur.execute("SELECT * FROM lapangan ORDER BY nama_lapangan")
         lapangans = cur.fetchall()
 
-        if tanggal:
-            cur.execute(
-                "SELECT * FROM bookings WHERE tanggal = %s ORDER BY nama_lapangan, jam_mulai",
-                (tanggal,),
+        bookings = []
+        if query_date:
+            query = (
+                "SELECT * FROM bookings "
+                "WHERE tanggal = %s "
+                "ORDER BY nama_lapangan, jam_mulai"
             )
+            app.logger.debug("Executing bookings query: %s with date=%s", query, query_date)
+            cur.execute(query, (query_date,))
             bookings = cur.fetchall()
-        else:
-            bookings = []
+            app.logger.debug("Bookings rows found: %d", len(bookings))
+            for book in bookings:
+                app.logger.debug("Booking row: %s", book)
     finally:
         conn.close()
 
     field_schedule = []
+    seen_lapangan_names = set()
     for lap in lapangans:
-        field_bookings = [b for b in bookings if b["nama_lapangan"] == lap["nama_lapangan"]]
-        if not field_bookings:
-            status = "Tersedia"
-        else:
-            active = any(b["status"] in ["Menunggu Persetujuan", "Disetujui (ACC)"] for b in field_bookings)
-            status = "Terisi" if active else "Tersedia"
+        lap_name = lap["nama_lapangan"].strip().lower()
+        field_bookings = [b for b in bookings if b["nama_lapangan"].strip().lower() == lap_name]
+        seen_lapangan_names.add(lap_name)
+        active_bookings = [b for b in field_bookings if b["status"] not in ["Ditolak", "Dibatalkan"]]
+        status = "Terisi" if active_bookings else "Tersedia"
         field_schedule.append({
             "lapangan": lap,
             "status": status,
-            "bookings": field_bookings,
+            "bookings": active_bookings if active_bookings else field_bookings,
         })
 
+    # Include any booking entries for lapangan names that are not present in the lapangan table.
+    missing_lapangans = {b["nama_lapangan"].strip().lower() for b in bookings} - seen_lapangan_names
+    for missing_name in missing_lapangans:
+        matched_bookings = [b for b in bookings if b["nama_lapangan"].strip().lower() == missing_name]
+        active_bookings = [b for b in matched_bookings if b["status"] not in ["Ditolak", "Dibatalkan"]]
+        field_schedule.append({
+            "lapangan": {"nama_lapangan": matched_bookings[0]["nama_lapangan"]},
+            "status": "Terisi" if active_bookings else "Tersedia",
+            "bookings": active_bookings if active_bookings else matched_bookings,
+        })
+
+    app.logger.debug("Field schedule entries: %d", len(field_schedule))
     return render_template("lapangan.html", tanggal=tanggal, field_schedule=field_schedule)
 
 # ── RIWAYAT ───────────────────────────────────────
@@ -429,5 +473,24 @@ def hapus(id):
     flash("Booking berhasil dihapus.")
     return redirect("/riwayat")
 
+@app.route("/dashboard")
+def dashboard():
+    role = session.get("role")
+
+    if role == "admin":
+        return redirect("/admin")
+    elif role == "pegawai":
+        return redirect("/pegawai")
+    elif role == "pengurus":
+        return redirect("/pengurus")
+    elif role == "user":
+        return redirect("/booking")
+
+    return redirect("/")
+
+@app.route("/user")
+def user():
+    return redirect("/booking")
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=8000, debug=True)
